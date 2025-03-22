@@ -1,0 +1,24 @@
+name: Test Gong Action
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-gong-action:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test Gong Action
+        uses: ./
+        with:
+          version: "latest"
+          args: "--help"
