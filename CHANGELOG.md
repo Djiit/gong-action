@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/Djiit/gong-action/compare/v0.2.0...v0.2.1) (2025-03-22)
+
+
+### Bug Fixes
+
+* fix cache support ([6ac41c1](https://github.com/Djiit/gong-action/commit/6ac41c1c71c167f4454f33000b9e4af71cc554b8))
+* fix gh token support ([bb0e499](https://github.com/Djiit/gong-action/commit/bb0e4992f4a820d901f936c6ac370ff79fe33f16))
+* fix undefined variable ([77c6f0e](https://github.com/Djiit/gong-action/commit/77c6f0eff2814488f7d08818d8153d00997f90e4))
+
 ## [0.2.0](https://github.com/Djiit/gong-action/compare/v0.1.0...v0.2.0) (2025-03-22)
 
 
