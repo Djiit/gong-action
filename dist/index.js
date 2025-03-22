@@ -34394,6 +34394,7 @@ async function run() {
     // Get inputs from action
     const version = core.getInput('version');
     const args = core.getInput('args');
+    const token = core.getInput('token');
     
     // Determine the platform and architecture
     const platform = getPlatform();
@@ -34404,7 +34405,7 @@ async function run() {
     
     if (version === 'latest') {
       // Get latest release info from GitHub API
-      const octokit = github.getOctokit(process.env.GITHUB_TOKEN || '');
+      const octokit = github.getOctokit(token);
       const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
         owner: 'Djiit',
         repo: 'gong'
