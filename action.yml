@@ -1,20 +1,20 @@
-name: 'Gong Action'
-description: 'Download and run gong binary from Djiit/gong releases'
-author: 'Djiit'
+name: "Gong Action"
+description: "Download and run gong binary from Djiit/gong releases"
+author: "Djiit"
 branding:
-  icon: 'bell'
-  color: 'yellow'
+  icon: "bell"
+  color: "blue"
 
 inputs:
   version:
-    description: 'Version of gong to download (defaults to latest)'
+    description: "Version of gong to download (defaults to latest)"
     required: false
-    default: 'latest'
+    default: "latest"
   args:
-    description: 'Arguments to pass to gong'
+    description: "Arguments to pass to gong"
     required: false
-    default: ''
+    default: ""
 
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: "node20"
+  main: "dist/index.js"

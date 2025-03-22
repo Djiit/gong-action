@@ -34395,11 +34395,12 @@ async function run() {
     const version = core.getInput('version');
     const args = core.getInput('args');
     
-    // Determine the URL to download gong
-    let downloadUrl;
-    let fileName;
+    // Determine the platform and architecture
     const platform = getPlatform();
     const arch = getArch();
+    
+    let gongPath;
+    let actualVersion = version;
     
     if (version === 'latest') {
       // Get latest release info from GitHub API
@@ -34409,35 +34410,57 @@ async function run() {
         repo: 'gong'
       });
       
-      // Find the appropriate asset for the current platform and architecture
-      const assetPattern = new RegExp(`gong_.*_${platform}_${arch}`);
-      const asset = latestRelease.assets.find(asset => assetPattern.test(asset.name));
-      
-      if (!asset) {
-        throw new Error(`No release found for ${platform}_${arch} in latest version`);
-      }
-      
-      downloadUrl = asset.browser_download_url;
-      fileName = asset.name;
-    } else {
-      // Construct URL for specific version
-      fileName = `gong_${version}_${platform}_${arch}`;
-      downloadUrl = `https://github.com/Djiit/gong/releases/download/v${version}/${fileName}`;
+      actualVersion = latestRelease.tag_name.replace(/^v/, '');
+      core.info(`Latest version is ${actualVersion}`);
     }
     
-    core.info(`Downloading gong from ${downloadUrl}`);
+    // Check if the tool is already cached
+    gongPath = tc.find('gong', actualVersion, arch);
     
-    // Download the gong binary
-    const downloadPath = await tc.downloadTool(downloadUrl);
+    if (gongPath) {
+      core.info(`gong ${actualVersion} found in cache`);
+    } else {
+      core.info(`gong ${actualVersion} not found in cache. Downloading...`);
+      
+      // Determine the URL to download gong
+      let downloadUrl;
+      
+      if (version === 'latest') {
+        // Find the appropriate asset for the current platform and architecture
+        const assetPattern = new RegExp(`gong_.*_${platform}_${arch}`);
+        const asset = latestRelease.assets.find(asset => assetPattern.test(asset.name));
+        
+        if (!asset) {
+          throw new Error(`No release found for ${platform}_${arch} in latest version`);
+        }
+        
+        downloadUrl = asset.browser_download_url;
+      } else {
+        // Construct URL for specific version
+        const fileName = `gong_${version}_${platform}_${arch}`;
+        downloadUrl = `https://github.com/Djiit/gong/releases/download/v${version}/${fileName}`;
+      }
+      
+      core.info(`Downloading gong from ${downloadUrl}`);
+      
+      // Download the gong binary
+      const downloadPath = await tc.downloadTool(downloadUrl);
+      
+      // Make the binary executable
+      await execPromise(`chmod +x ${downloadPath}`);
+      
+      core.info('Downloaded gong successfully');
+      
+      // Cache the tool for future use
+      gongPath = await tc.cacheFile(downloadPath, 'gong', 'gong', actualVersion, arch);
+      core.info(`gong has been cached at ${gongPath}`);
+    }
     
-    // Make the binary executable
-    await execPromise(`chmod +x ${downloadPath}`);
-    
-    core.info('Downloaded gong successfully');
-    
+    const gongExecutable = path.join(gongPath, 'gong');
+    // so this is a change
     // Run gong with provided arguments
     core.info(`Running gong ${args}`);
-    const { stdout, stderr } = await execPromise(`${downloadPath} ${args}`);
+    const { stdout, stderr } = await execPromise(`${gongExecutable} ${args}`);
     
     if (stdout) {
       core.info(stdout);

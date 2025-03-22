@@ -4,7 +4,7 @@
 
 <!-- AUTO-DOC-DESCRIPTION:START - Do not remove or modify this section -->
 
-Download and run `gong` binary from Djiit/gong releases
+Download and run gong binary from Djiit/gong releases
 
 <!-- AUTO-DOC-DESCRIPTION:END -->
 
@@ -38,19 +38,17 @@ jobs:
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-| INPUT   | TYPE   | REQUIRED | DEFAULT    | DESCRIPTION                                      |
-| ------- | ------ | -------- | ---------- | ------------------------------------------------ |
-| args    | string | false    |            | Arguments to pass to gong                        |
-| version | string | false    | `"latest"` | Version of gong to download (defaults to latest) |
+|  INPUT  |  TYPE  | REQUIRED |  DEFAULT   |                    DESCRIPTION                    |
+|---------|--------|----------|------------|---------------------------------------------------|
+|  args   | string |  false   |            |             Arguments to pass to gong             |
+| version | string |  false   | `"latest"` | Version of gong to download (defaults to latest)  |
 
 <!-- AUTO-DOC-INPUT:END -->
 
 ## Outputs
 
 <!-- AUTO-DOC-OUTPUT:START - Do not remove or modify this section -->
-
 No outputs.
-
 <!-- AUTO-DOC-OUTPUT:END -->
 
 ## Plateformes supportées
