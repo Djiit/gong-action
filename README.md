@@ -38,10 +38,11 @@ jobs:
 
 <!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
 
-|  INPUT  |  TYPE  | REQUIRED |  DEFAULT   |                    DESCRIPTION                    |
-|---------|--------|----------|------------|---------------------------------------------------|
-|  args   | string |  false   |            |             Arguments to pass to gong             |
-| version | string |  false   | `"latest"` | Version of gong to download (defaults to latest)  |
+|  INPUT  |  TYPE  | REQUIRED |         DEFAULT         |                             DESCRIPTION                              |
+|---------|--------|----------|-------------------------|----------------------------------------------------------------------|
+|  args   | string |  false   |                         |                      Arguments to pass to gong                       |
+|  token  | string |  false   | `"${{ github.token }}"` | GitHub token to use for API <br>requests (defaults to GITHUB_TOKEN)  |
+| version | string |  false   |       `"latest"`        |          Version of gong to download (defaults to latest)            |
 
 <!-- AUTO-DOC-INPUT:END -->
 
