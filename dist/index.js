@@ -34373,173 +34373,211 @@ module.exports = parseParams
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-const core = __nccwpck_require__(7484);
-const github = __nccwpck_require__(3228);
-const tc = __nccwpck_require__(3472);
-const path = __nccwpck_require__(6928);
-const os = __nccwpck_require__(857);
-const { exec } = __nccwpck_require__(5317);
-const { promisify } = __nccwpck_require__(9023);
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7484);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3228);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(3472);
+/* harmony import */ var _actions_tool_cache__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_actions_tool_cache__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(6928);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(857);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var child_process__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(5317);
+/* harmony import */ var child_process__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__nccwpck_require__.n(child_process__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(9023);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__nccwpck_require__.n(util__WEBPACK_IMPORTED_MODULE_6__);
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
-const execPromise = promisify(exec);
 
-// Validation de format semver simple (x.y.z)
+
+
+
+
+
+const execPromise = (0,util__WEBPACK_IMPORTED_MODULE_6__.promisify)(child_process__WEBPACK_IMPORTED_MODULE_5__.exec);
 function isValidSemver(version) {
-  const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
-  return semverRegex.test(version);
+    const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+    return semverRegex.test(version);
 }
-
 function sanitizeVersion(version) {
-  return version.replace(/^v/, "");
+    return version.replace(/^v/, "");
 }
-
-async function run() {
-  try {
-    // Get inputs from action
-    const version = core.getInput("version");
-    const args = core.getInput("args");
-    const token = core.getInput("token");
-
-    // Determine the platform and architecture
-    const platform = getPlatform();
-    const arch = getArch();
-
-    let gongPath;
-    let actualVersion = version;
-
-    if (version === "latest") {
-      // Get latest release info from GitHub API
-      const octokit = github.getOctokit(token);
-
-      try {
-        const { data: latestRelease } =
-          await octokit.rest.repos.getLatestRelease({
-            owner: "Djiit",
-            repo: "gong",
-          });
-
-        actualVersion = latestRelease.tag_name.replace(/^v/, "");
-        core.info(`Latest version is ${actualVersion}`);
-      } catch (error) {
-        if (error.status === 404) {
-          core.setFailed(
-            "No releases found for Djiit/gong. Make sure the repository exists and has published releases."
-          );
-        } else {
-          core.setFailed(`Failed to fetch latest release: ${error.message}`);
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Get inputs from action
+            const version = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("version");
+            const args = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("args");
+            const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("token");
+            // Determine the platform and architecture
+            const platform = getPlatform();
+            const arch = getArch();
+            let gongPath;
+            let actualVersion = version;
+            if (version === "latest") {
+                // Get latest release info from GitHub API
+                const octokit = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(token);
+                try {
+                    const { data: latestRelease } = yield octokit.rest.repos.getLatestRelease({
+                        owner: "Djiit",
+                        repo: "gong",
+                    });
+                    actualVersion = sanitizeVersion(latestRelease.tag_name);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Latest version is ${actualVersion}`);
+                }
+                catch (error) {
+                    if (error.status === 404) {
+                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed("No releases found for Djiit/gong. Make sure the repository exists and has published releases.");
+                    }
+                    else {
+                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(`Failed to fetch latest release: ${error.message}`);
+                    }
+                    return;
+                }
+            }
+            else {
+                actualVersion = sanitizeVersion(version);
+                if (!isValidSemver(actualVersion)) {
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(`Invalid version format: ${version}. Please use a valid semver format (x.y.z) or 'latest'.`);
+                    return;
+                }
+            }
+            // Check if the tool is already cached
+            gongPath = _actions_tool_cache__WEBPACK_IMPORTED_MODULE_2__.find("gong", actualVersion, arch);
+            if (gongPath) {
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`gong ${actualVersion} found in cache`);
+            }
+            else {
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`gong ${actualVersion} not found in cache. Downloading...`);
+                try {
+                    // Determine the URL to download gong
+                    const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${actualVersion}/gong_${actualVersion}_${platform}_amd64.tar.gz`;
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Downloading gong from ${downloadUrl}`);
+                    // Download the gong binary
+                    const downloadPath = yield _actions_tool_cache__WEBPACK_IMPORTED_MODULE_2__.downloadTool(downloadUrl);
+                    const extractedPath = yield _actions_tool_cache__WEBPACK_IMPORTED_MODULE_2__.extractTar(downloadPath);
+                    // Make the binary executable
+                    yield execPromise(`chmod +x ${path__WEBPACK_IMPORTED_MODULE_3__.join(extractedPath, "gong")}`);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Downloaded gong successfully");
+                    // Cache the tool for future use
+                    gongPath = yield _actions_tool_cache__WEBPACK_IMPORTED_MODULE_2__.cacheFile(path__WEBPACK_IMPORTED_MODULE_3__.join(extractedPath, "gong"), "gong", "gong", actualVersion, arch);
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`gong has been cached at ${gongPath}`);
+                }
+                catch (error) {
+                    if (error.message.includes("404")) {
+                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(`Version ${actualVersion} not found. Please check if this version exists in the Djiit/gong releases.`);
+                    }
+                    else {
+                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(`Failed to download gong: ${error.message}`);
+                    }
+                    return;
+                }
+            }
+            const gongExecutable = path__WEBPACK_IMPORTED_MODULE_3__.join(gongPath, "gong");
+            // Run gong with provided arguments
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(`Running gong ${args}`);
+            const { stdout, stderr } = yield execPromise(`${gongExecutable} ${args}`);
+            if (stdout) {
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.info(stdout);
+            }
+            if (stderr) {
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning(stderr);
+            }
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("gong execution completed");
         }
-        return;
-      }
-    } else {
-      actualVersion = sanitizeVersion(version);
-
-      if (!isValidSemver(actualVersion)) {
-        core.setFailed(
-          `Invalid version format: ${version}. Please use a valid semver format (x.y.z) or 'latest'.`
-        );
-        return;
-      }
-    }
-
-    // Check if the tool is already cached
-    gongPath = tc.find("gong", actualVersion, arch);
-
-    if (gongPath) {
-      core.info(`gong ${actualVersion} found in cache`);
-    } else {
-      core.info(`gong ${actualVersion} not found in cache. Downloading...`);
-
-      try {
-        // Determine the URL to download gong
-        const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${actualVersion}/gong_${actualVersion}_${platform}_amd64.tar.gz`;
-        core.info(`Downloading gong from ${downloadUrl}`);
-
-        // Download the gong binary
-        const downloadPath = await tc.downloadTool(downloadUrl);
-        const extractedPath = await tc.extractTar(downloadPath);
-
-        // Make the binary executable
-        await execPromise(`chmod +x ${path.join(extractedPath, "gong")}`);
-
-        core.info("Downloaded gong successfully");
-
-        // Cache the tool for future use
-        gongPath = await tc.cacheFile(
-          path.join(extractedPath, "gong"),
-          "gong",
-          "gong",
-          actualVersion,
-          arch
-        );
-        core.info(`gong has been cached at ${gongPath}`);
-      } catch (error) {
-        if (error.message.includes("404")) {
-          core.setFailed(
-            `Version ${actualVersion} not found. Please check if this version exists in the Djiit/gong releases.`
-          );
-        } else {
-          core.setFailed(`Failed to download gong: ${error.message}`);
+        catch (error) {
+            _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error.message);
         }
-        return;
-      }
-    }
-
-    const gongExecutable = path.join(gongPath, "gong");
-    // Run gong with provided arguments
-    core.info(`Running gong ${args}`);
-    const { stdout, stderr } = await execPromise(`${gongExecutable} ${args}`);
-
-    if (stdout) {
-      core.info(stdout);
-    }
-
-    if (stderr) {
-      core.warning(stderr);
-    }
-
-    core.info("gong execution completed");
-  } catch (error) {
-    core.setFailed(error.message);
-  }
+    });
 }
-
 function getPlatform() {
-  const platform = os.platform();
-
-  switch (platform) {
-    case "darwin":
-      return "darwin";
-    case "linux":
-      return "linux";
-    case "win32":
-      return "windows";
-    default:
-      throw new Error(`Unsupported platform: ${platform}`);
-  }
+    const platform = os__WEBPACK_IMPORTED_MODULE_4__.platform();
+    switch (platform) {
+        case "darwin":
+            return "darwin";
+        case "linux":
+            return "linux";
+        case "win32":
+            return "windows";
+        default:
+            throw new Error(`Unsupported platform: ${platform}`);
+    }
 }
-
 function getArch() {
-  const arch = os.arch();
-
-  switch (arch) {
-    case "x64":
-      return "amd64";
-    case "arm64":
-      return "arm64";
-    case "ia32":
-      return "386";
-    default:
-      throw new Error(`Unsupported architecture: ${arch}`);
-  }
+    const arch = os__WEBPACK_IMPORTED_MODULE_4__.arch();
+    switch (arch) {
+        case "x64":
+            return "amd64";
+        case "arm64":
+            return "arm64";
+        case "ia32":
+            return "386";
+        default:
+            throw new Error(`Unsupported architecture: ${arch}`);
+    }
 }
-
 run();
+
+})();
 
 module.exports = __webpack_exports__;
 /******/ })()

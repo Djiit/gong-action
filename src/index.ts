@@ -1,51 +1,48 @@
-const core = require("@actions/core");
-const github = require("@actions/github");
-const tc = require("@actions/tool-cache");
-const path = require("path");
-const os = require("os");
-const { exec } = require("child_process");
-const { promisify } = require("util");
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+import * as tc from "@actions/tool-cache";
+import * as path from "path";
+import * as os from "os";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 const execPromise = promisify(exec);
 
-// Validation de format semver simple (x.y.z)
-function isValidSemver(version) {
+function isValidSemver(version: string): boolean {
   const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
   return semverRegex.test(version);
 }
 
-function sanitizeVersion(version) {
+function sanitizeVersion(version: string): string {
   return version.replace(/^v/, "");
 }
 
-async function run() {
+async function run(): Promise<void> {
   try {
     // Get inputs from action
-    const version = core.getInput("version");
-    const args = core.getInput("args");
-    const token = core.getInput("token");
+    const version: string = core.getInput("version");
+    const args: string = core.getInput("args");
+    const token: string = core.getInput("token");
 
     // Determine the platform and architecture
-    const platform = getPlatform();
-    const arch = getArch();
+    const platform: string = getPlatform();
+    const arch: string = getArch();
 
-    let gongPath;
-    let actualVersion = version;
+    let gongPath: string;
+    let actualVersion: string = version;
 
     if (version === "latest") {
       // Get latest release info from GitHub API
       const octokit = github.getOctokit(token);
-
       try {
         const { data: latestRelease } =
           await octokit.rest.repos.getLatestRelease({
             owner: "Djiit",
             repo: "gong",
           });
-
-        actualVersion = latestRelease.tag_name.replace(/^v/, "");
+        actualVersion = sanitizeVersion(latestRelease.tag_name);
         core.info(`Latest version is ${actualVersion}`);
-      } catch (error) {
+      } catch (error: any) {
         if (error.status === 404) {
           core.setFailed(
             "No releases found for Djiit/gong. Make sure the repository exists and has published releases."
@@ -57,7 +54,6 @@ async function run() {
       }
     } else {
       actualVersion = sanitizeVersion(version);
-
       if (!isValidSemver(actualVersion)) {
         core.setFailed(
           `Invalid version format: ${version}. Please use a valid semver format (x.y.z) or 'latest'.`
@@ -73,7 +69,6 @@ async function run() {
       core.info(`gong ${actualVersion} found in cache`);
     } else {
       core.info(`gong ${actualVersion} not found in cache. Downloading...`);
-
       try {
         // Determine the URL to download gong
         const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${actualVersion}/gong_${actualVersion}_${platform}_amd64.tar.gz`;
@@ -85,7 +80,6 @@ async function run() {
 
         // Make the binary executable
         await execPromise(`chmod +x ${path.join(extractedPath, "gong")}`);
-
         core.info("Downloaded gong successfully");
 
         // Cache the tool for future use
@@ -97,7 +91,7 @@ async function run() {
           arch
         );
         core.info(`gong has been cached at ${gongPath}`);
-      } catch (error) {
+      } catch (error: any) {
         if (error.message.includes("404")) {
           core.setFailed(
             `Version ${actualVersion} not found. Please check if this version exists in the Djiit/gong releases.`
@@ -110,6 +104,7 @@ async function run() {
     }
 
     const gongExecutable = path.join(gongPath, "gong");
+
     // Run gong with provided arguments
     core.info(`Running gong ${args}`);
     const { stdout, stderr } = await execPromise(`${gongExecutable} ${args}`);
@@ -117,20 +112,17 @@ async function run() {
     if (stdout) {
       core.info(stdout);
     }
-
     if (stderr) {
       core.warning(stderr);
     }
-
     core.info("gong execution completed");
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error.message);
   }
 }
 
-function getPlatform() {
+function getPlatform(): string {
   const platform = os.platform();
-
   switch (platform) {
     case "darwin":
       return "darwin";
@@ -143,9 +135,8 @@ function getPlatform() {
   }
 }
 
-function getArch() {
+function getArch(): string {
   const arch = os.arch();
-
   switch (arch) {
     case "x64":
       return "amd64";

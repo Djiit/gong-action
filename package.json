@@ -4,7 +4,8 @@
   "description": "GitHub Action to download and run gong",
   "main": "dist/index.js",
   "scripts": {
-    "build": "ncc build src/index.js -o dist",
+    "build": "ncc build src/index.ts -o dist",
+    "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
   },
@@ -21,8 +22,10 @@
     "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
+    "@types/node": "^22.13.11",
     "@vercel/ncc": "^0.38.1",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.0"
+    "lint-staged": "^15.5.0",
+    "typescript": "^5.8.2"
   }
 }
