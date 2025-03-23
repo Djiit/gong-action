@@ -34395,15 +34395,8 @@ var tool_cache = __nccwpck_require__(3472);
 var exec = __nccwpck_require__(5236);
 // EXTERNAL MODULE: external "os"
 var external_os_ = __nccwpck_require__(857);
-// EXTERNAL MODULE: external "child_process"
-var external_child_process_ = __nccwpck_require__(5317);
-// EXTERNAL MODULE: external "util"
-var external_util_ = __nccwpck_require__(9023);
 ;// CONCATENATED MODULE: ./src/utils.ts
 
-
-
-const execPromise = (0,external_util_.promisify)(external_child_process_.exec);
 function getPlatform() {
     const currentPlatform = (0,external_os_.platform)();
     switch (currentPlatform) {

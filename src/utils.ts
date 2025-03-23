@@ -1,8 +1,4 @@
 import { arch, platform } from "os";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-export const execPromise = promisify(exec);
 
 export function getPlatform(): string {
   const currentPlatform = platform();
