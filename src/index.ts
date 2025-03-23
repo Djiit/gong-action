@@ -1,30 +1,20 @@
+import { join } from "node:path";
+
 import * as core from "@actions/core";
-import * as github from "@actions/github";
-import * as tc from "@actions/tool-cache";
-import * as path from "path";
-import * as os from "os";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { getOctokit } from "@actions/github";
+import { cacheFile, downloadTool, find, extractTar } from "@actions/tool-cache";
+import { exec } from "@actions/exec";
 
-const execPromise = promisify(exec);
-
-function isValidSemver(version: string): boolean {
-  const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
-  return semverRegex.test(version);
-}
-
-function sanitizeVersion(version: string): string {
-  return version.replace(/^v/, "");
-}
+import { getArch, getPlatform } from "./utils";
+import { isValidSemver, sanitizeVersion } from "./version";
+import { listeners } from "node:process";
 
 async function run(): Promise<void> {
   try {
-    // Get inputs from action
     const version: string = core.getInput("version");
     const args: string = core.getInput("args");
     const token: string = core.getInput("token");
 
-    // Determine the platform and architecture
     const platform: string = getPlatform();
     const arch: string = getArch();
 
@@ -33,7 +23,7 @@ async function run(): Promise<void> {
 
     if (version === "latest") {
       // Get latest release info from GitHub API
-      const octokit = github.getOctokit(token);
+      const octokit = getOctokit(token);
       try {
         const { data: latestRelease } =
           await octokit.rest.repos.getLatestRelease({
@@ -63,28 +53,26 @@ async function run(): Promise<void> {
     }
 
     // Check if the tool is already cached
-    gongPath = tc.find("gong", actualVersion, arch);
+    gongPath = find("gong", actualVersion, arch);
 
     if (gongPath) {
       core.info(`gong ${actualVersion} found in cache`);
     } else {
       core.info(`gong ${actualVersion} not found in cache. Downloading...`);
       try {
-        // Determine the URL to download gong
         const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${actualVersion}/gong_${actualVersion}_${platform}_amd64.tar.gz`;
+
         core.info(`Downloading gong from ${downloadUrl}`);
 
-        // Download the gong binary
-        const downloadPath = await tc.downloadTool(downloadUrl);
-        const extractedPath = await tc.extractTar(downloadPath);
+        const downloadPath = await downloadTool(downloadUrl);
+        const extractedPath = await extractTar(downloadPath);
 
-        // Make the binary executable
-        await execPromise(`chmod +x ${path.join(extractedPath, "gong")}`);
+        await exec("chmod", ["+x", join(extractedPath, "gong")]);
+
         core.info("Downloaded gong successfully");
 
-        // Cache the tool for future use
-        gongPath = await tc.cacheFile(
-          path.join(extractedPath, "gong"),
+        gongPath = await cacheFile(
+          join(extractedPath, "gong"),
           "gong",
           "gong",
           actualVersion,
@@ -103,11 +91,22 @@ async function run(): Promise<void> {
       }
     }
 
-    const gongExecutable = path.join(gongPath, "gong");
+    const gongExecutable = join(gongPath, "gong");
 
-    // Run gong with provided arguments
+    let stdout = "";
+    let stderr = "";
+
     core.info(`Running gong ${args}`);
-    const { stdout, stderr } = await execPromise(`${gongExecutable} ${args}`);
+    await exec(gongExecutable, args.split(" "), {
+      listeners: {
+        stdout: (data: Buffer) => {
+          stdout += data.toString();
+        },
+        stderr: (data: Buffer) => {
+          stderr += data.toString();
+        },
+      },
+    });
 
     if (stdout) {
       core.info(stdout);
@@ -115,37 +114,9 @@ async function run(): Promise<void> {
     if (stderr) {
       core.warning(stderr);
     }
-    core.info("gong execution completed");
+    core.debug("gong execution completed");
   } catch (error: any) {
     core.setFailed(error.message);
-  }
-}
-
-function getPlatform(): string {
-  const platform = os.platform();
-  switch (platform) {
-    case "darwin":
-      return "darwin";
-    case "linux":
-      return "linux";
-    case "win32":
-      return "windows";
-    default:
-      throw new Error(`Unsupported platform: ${platform}`);
-  }
-}
-
-function getArch(): string {
-  const arch = os.arch();
-  switch (arch) {
-    case "x64":
-      return "amd64";
-    case "arm64":
-      return "arm64";
-    case "ia32":
-      return "386";
-    default:
-      throw new Error(`Unsupported architecture: ${arch}`);
   }
 }
 
