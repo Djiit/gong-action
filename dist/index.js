@@ -34385,9 +34385,19 @@ const tc = __nccwpck_require__(3472);
 const path = __nccwpck_require__(6928);
 const os = __nccwpck_require__(857);
 const { exec } = __nccwpck_require__(5317);
-const util = __nccwpck_require__(9023);
+const { promisify } = __nccwpck_require__(9023);
 
-const execPromise = util.promisify(exec);
+const execPromise = promisify(exec);
+
+// Validation de format semver simple (x.y.z)
+function isValidSemver(version) {
+  const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+  return semverRegex.test(version);
+}
+
+function sanitizeVersion(version) {
+  return version.replace(/^v/, "");
+}
 
 async function run() {
   try {
@@ -34402,20 +34412,39 @@ async function run() {
 
     let gongPath;
     let actualVersion = version;
-    let latestRelease;
 
     if (version === "latest") {
       // Get latest release info from GitHub API
       const octokit = github.getOctokit(token);
-      const { data: latestRelease } = await octokit.rest.repos.getLatestRelease(
-        {
-          owner: "Djiit",
-          repo: "gong",
-        }
-      );
 
-      actualVersion = latestRelease.tag_name.replace(/^v/, "");
-      core.info(`Latest version is ${actualVersion}`);
+      try {
+        const { data: latestRelease } =
+          await octokit.rest.repos.getLatestRelease({
+            owner: "Djiit",
+            repo: "gong",
+          });
+
+        actualVersion = latestRelease.tag_name.replace(/^v/, "");
+        core.info(`Latest version is ${actualVersion}`);
+      } catch (error) {
+        if (error.status === 404) {
+          core.setFailed(
+            "No releases found for Djiit/gong. Make sure the repository exists and has published releases."
+          );
+        } else {
+          core.setFailed(`Failed to fetch latest release: ${error.message}`);
+        }
+        return;
+      }
+    } else {
+      actualVersion = sanitizeVersion(version);
+
+      if (!isValidSemver(actualVersion)) {
+        core.setFailed(
+          `Invalid version format: ${version}. Please use a valid semver format (x.y.z) or 'latest'.`
+        );
+        return;
+      }
     }
 
     // Check if the tool is already cached
@@ -34426,32 +34455,42 @@ async function run() {
     } else {
       core.info(`gong ${actualVersion} not found in cache. Downloading...`);
 
-      // Determine the URL to download gong
-      const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${actualVersion}/gong_${actualVersion}_${platform}_amd64.tar.gz`;
-      core.info(`Downloading gong from ${downloadUrl}`);
+      try {
+        // Determine the URL to download gong
+        const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${actualVersion}/gong_${actualVersion}_${platform}_amd64.tar.gz`;
+        core.info(`Downloading gong from ${downloadUrl}`);
 
-      // Download the gong binary
-      const downloadPath = await tc.downloadTool(downloadUrl);
-      const extractedPath = await tc.extractTar(downloadPath);
+        // Download the gong binary
+        const downloadPath = await tc.downloadTool(downloadUrl);
+        const extractedPath = await tc.extractTar(downloadPath);
 
-      // Make the binary executable
-      await execPromise(`chmod +x ${path.join(extractedPath, "gong")}`);
+        // Make the binary executable
+        await execPromise(`chmod +x ${path.join(extractedPath, "gong")}`);
 
-      core.info("Downloaded gong successfully");
+        core.info("Downloaded gong successfully");
 
-      // Cache the tool for future use
-      gongPath = await tc.cacheFile(
-        path.join(extractedPath, "gong"),
-        "gong",
-        "gong",
-        actualVersion,
-        arch
-      );
-      core.info(`gong has been cached at ${gongPath}`);
+        // Cache the tool for future use
+        gongPath = await tc.cacheFile(
+          path.join(extractedPath, "gong"),
+          "gong",
+          "gong",
+          actualVersion,
+          arch
+        );
+        core.info(`gong has been cached at ${gongPath}`);
+      } catch (error) {
+        if (error.message.includes("404")) {
+          core.setFailed(
+            `Version ${actualVersion} not found. Please check if this version exists in the Djiit/gong releases.`
+          );
+        } else {
+          core.setFailed(`Failed to download gong: ${error.message}`);
+        }
+        return;
+      }
     }
 
     const gongExecutable = path.join(gongPath, "gong");
-    // so this is a change
     // Run gong with provided arguments
     core.info(`Running gong ${args}`);
     const { stdout, stderr } = await execPromise(`${gongExecutable} ${args}`);
