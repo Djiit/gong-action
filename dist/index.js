@@ -34423,8 +34423,6 @@ function getArch() {
             throw new Error(`Unsupported architecture: ${currentArch}`);
     }
 }
-
-;// CONCATENATED MODULE: ./src/version.ts
 function isValidSemver(version) {
     const semverRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
     return semverRegex.test(version);
@@ -34449,76 +34447,85 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-
+function getGongVersion(version, token) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let actualVersion = "";
+        if (version === "latest") {
+            // Get latest release info from GitHub API
+            const octokit = (0,github.getOctokit)(token);
+            try {
+                const { data: latestRelease } = yield octokit.rest.repos.getLatestRelease({
+                    owner: "Djiit",
+                    repo: "gong",
+                });
+                actualVersion = sanitizeVersion(latestRelease.tag_name);
+                (0,core.info)(`Latest version is ${actualVersion}`);
+            }
+            catch (error) {
+                if (error.status === 404) {
+                    (0,core.setFailed)("No releases found for Djiit/gong. Make sure the repository exists and has published releases.");
+                }
+                else {
+                    (0,core.setFailed)(`Failed to fetch latest release: ${error.message}`);
+                }
+            }
+        }
+        else {
+            actualVersion = sanitizeVersion(version);
+            if (!isValidSemver(actualVersion)) {
+                (0,core.setFailed)(`Invalid version format: ${version}. Please use a valid semver format (x.y.z) or 'latest'.`);
+            }
+        }
+        return actualVersion;
+    });
+}
+function getGongPath(version, arch, platform) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Check if the tool is already cached
+        let gongPath;
+        gongPath = (0,tool_cache.find)("gong", version, arch);
+        if (gongPath) {
+            (0,core.info)(`gong ${version} found in cache`);
+        }
+        else {
+            (0,core.info)(`gong ${version} not found in cache. Downloading...`);
+            try {
+                const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${version}/gong_${version}_${platform}_amd64.tar.gz`;
+                (0,core.info)(`Downloading gong from ${downloadUrl}`);
+                const downloadPath = yield (0,tool_cache.downloadTool)(downloadUrl);
+                const extractedPath = yield (0,tool_cache.extractTar)(downloadPath);
+                yield (0,exec.exec)("chmod", ["+x", (0,external_node_path_namespaceObject.join)(extractedPath, "gong")]);
+                (0,core.info)("Downloaded gong successfully");
+                gongPath = yield (0,tool_cache.cacheFile)((0,external_node_path_namespaceObject.join)(extractedPath, "gong"), "gong", "gong", version, arch);
+                (0,core.info)(`gong has been cached at ${gongPath}`);
+            }
+            catch (error) {
+                if (error.message.includes("404")) {
+                    (0,core.setFailed)(`Version ${version} not found. Please check if this version exists in the Djiit/gong releases.`);
+                }
+                else {
+                    (0,core.setFailed)(`Failed to download gong: ${error.message}`);
+                }
+                return "";
+            }
+        }
+        return gongPath;
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const version = core.getInput("version");
-            const args = core.getInput("args");
-            const token = core.getInput("token");
+            const version = (0,core.getInput)("version");
+            const args = (0,core.getInput)("args");
+            const token = (0,core.getInput)("token");
             const platform = getPlatform();
             const arch = getArch();
-            let gongPath;
-            let actualVersion = version;
-            if (version === "latest") {
-                // Get latest release info from GitHub API
-                const octokit = (0,github.getOctokit)(token);
-                try {
-                    const { data: latestRelease } = yield octokit.rest.repos.getLatestRelease({
-                        owner: "Djiit",
-                        repo: "gong",
-                    });
-                    actualVersion = sanitizeVersion(latestRelease.tag_name);
-                    core.info(`Latest version is ${actualVersion}`);
-                }
-                catch (error) {
-                    if (error.status === 404) {
-                        core.setFailed("No releases found for Djiit/gong. Make sure the repository exists and has published releases.");
-                    }
-                    else {
-                        core.setFailed(`Failed to fetch latest release: ${error.message}`);
-                    }
-                    return;
-                }
-            }
-            else {
-                actualVersion = sanitizeVersion(version);
-                if (!isValidSemver(actualVersion)) {
-                    core.setFailed(`Invalid version format: ${version}. Please use a valid semver format (x.y.z) or 'latest'.`);
-                    return;
-                }
-            }
-            // Check if the tool is already cached
-            gongPath = (0,tool_cache.find)("gong", actualVersion, arch);
-            if (gongPath) {
-                core.info(`gong ${actualVersion} found in cache`);
-            }
-            else {
-                core.info(`gong ${actualVersion} not found in cache. Downloading...`);
-                try {
-                    const downloadUrl = `https://github.com/Djiit/gong/releases/download/v${actualVersion}/gong_${actualVersion}_${platform}_amd64.tar.gz`;
-                    core.info(`Downloading gong from ${downloadUrl}`);
-                    const downloadPath = yield (0,tool_cache.downloadTool)(downloadUrl);
-                    const extractedPath = yield (0,tool_cache.extractTar)(downloadPath);
-                    yield (0,exec.exec)("chmod", ["+x", (0,external_node_path_namespaceObject.join)(extractedPath, "gong")]);
-                    core.info("Downloaded gong successfully");
-                    gongPath = yield (0,tool_cache.cacheFile)((0,external_node_path_namespaceObject.join)(extractedPath, "gong"), "gong", "gong", actualVersion, arch);
-                    core.info(`gong has been cached at ${gongPath}`);
-                }
-                catch (error) {
-                    if (error.message.includes("404")) {
-                        core.setFailed(`Version ${actualVersion} not found. Please check if this version exists in the Djiit/gong releases.`);
-                    }
-                    else {
-                        core.setFailed(`Failed to download gong: ${error.message}`);
-                    }
-                    return;
-                }
-            }
+            const gongVersion = yield getGongVersion(version, token);
+            const gongPath = yield getGongPath(gongVersion, arch, platform);
             const gongExecutable = (0,external_node_path_namespaceObject.join)(gongPath, "gong");
             let stdout = "";
             let stderr = "";
-            core.info(`Running gong ${args}`);
+            (0,core.info)(`Running gong ${args}`);
             yield (0,exec.exec)(gongExecutable, args.split(" "), {
                 listeners: {
                     stdout: (data) => {
@@ -34530,15 +34537,15 @@ function run() {
                 },
             });
             if (stdout) {
-                core.info(stdout);
+                (0,core.info)(stdout);
             }
             if (stderr) {
-                core.warning(stderr);
+                (0,core.warning)(stderr);
             }
-            core.debug("gong execution completed");
+            (0,core.debug)("gong execution completed");
         }
         catch (error) {
-            core.setFailed(error.message);
+            (0,core.setFailed)(error.message);
         }
     });
 }
