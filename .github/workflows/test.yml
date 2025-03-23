@@ -12,17 +12,24 @@ permissions:
   contents: read
 
 jobs:
-  test-gong-action:
+  test:
     # strategy:
     #   matrix:
     #     os: [ubuntu-latest, macos-latest, windows-latest]
     # runs-on: ${{ matrix.os }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Test Gong Action
         uses: ./
         with:
           version: "latest"
           args: "--help"
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Lint
+        uses: reviewdog/action-actionlint@v1.65.2

@@ -1,5 +1,8 @@
 # Gong Action
 
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Djiit/gong-action/test.yml?branch=main)](https://github.com/Djiit/gong-action/actions)
+[![GitHub](https://img.shields.io/github/license/Djiit/gong-action)](https://img.shields.io/github/license/Djiit/gong-action)
+
 ## Description
 
 <!-- AUTO-DOC-DESCRIPTION:START - Do not remove or modify this section -->
