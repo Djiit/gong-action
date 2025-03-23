@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/Djiit/gong-action/compare/v0.2.1...v0.3.0) (2025-03-23)
+
+
+### Features
+
+* move to TS ([832eb25](https://github.com/Djiit/gong-action/commit/832eb2560bf6c12e8e5073b90345f3b1e652599f))
+* validate version input ([995eca8](https://github.com/Djiit/gong-action/commit/995eca83a9c4adf50bbeb690b40b4b2b5611e371))
+
 ## [0.2.1](https://github.com/Djiit/gong-action/compare/v0.2.0...v0.2.1) (2025-03-22)
 
 
