@@ -22,7 +22,7 @@
     "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.13.11",
+    "@types/node": "^22.15.17",
     "@vercel/ncc": "^0.38.1",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
